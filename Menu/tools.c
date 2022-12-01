@@ -10,7 +10,14 @@
 #include<stdlib.h>
 #ifdef _WIN32
 #include<windows.h>
+#include<conio.h>
+#define UP 80
+#define DOWN 72
+#else
+#define UP 66
+#define DOWN 65
 #endif
+#define ENTER 13
 
 /**
  * @brief Moves cursor to desired coordinates.
@@ -23,8 +30,8 @@ void gotoXY(int x, int y) {
     HANDLE hcon;  
     hcon = GetStdHandle(STD_OUTPUT_HANDLE);  
     COORD dwPos;  
-    dwPos.X = x;  
-    dwPos.Y= y;  
+    dwPos.X = x - 1;  
+    dwPos.Y= y - 1;  
     SetConsoleCursorPosition(hcon,dwPos); 
     #else
     printf("%c[%d;%df", 0x1B, y, x);
@@ -71,14 +78,17 @@ int showMenu(int numItems, char* items[], char const *title) {
     while (opt == -1) {
         #ifdef _WIN32
         c = getch();
+        if(c == 0) {
+            c = getch();
+        }
         #else
         c = getc(stdin);
         #endif
-        if(c==13) {
+        if(c == ENTER) {
             // Enter
             opt = mark;
         }
-        if(c == 66) {
+        if(c == UP) {
             // Up arrow
             gotoXY(2, mark + 2);
             printf("  ");
@@ -87,7 +97,7 @@ int showMenu(int numItems, char* items[], char const *title) {
             printf(">>");
             gotoXY(22, numItems + 2);
         }
-        if(c == 65) {
+        if(c == DOWN) {
             // Down arrow
             gotoXY(2, mark + 2);
             printf("  ");
