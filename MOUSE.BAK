@@ -1,0 +1,23 @@
+#include<stdio.h>
+#include<dos.h>
+#include<conio.h>
+union REGS in, out;
+
+void detect_mouse() {
+    in.x.ax = 0;
+    int86(0X33, &in, &out);
+    if(out.x.ax == 0)
+	printf("Mouse no disponible");
+}
+void show_mouse() {
+    in.x.ax = 1;
+    int86(0X33, &in, &out);
+}
+
+int main() {
+    detect_mouse();
+    show_mouse();
+    getch();
+    return 0;
+
+}
