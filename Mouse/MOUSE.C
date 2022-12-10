@@ -3,6 +3,10 @@
 #include<conio.h>
 
 #define MOUSE 0X33
+#define UP 72
+#define DOWN 80
+#define LEFT 75
+#define RIGHT 77
 
 union REGS in, out;
 
@@ -26,16 +30,37 @@ void mouse_data(int *x, int *y, int *b) {
 }
 
 int main() {
-    int x,y,b;
+    int x = 1,y = 1,b;
+    char c=0;
     clrscr();
+    _setcursortype(_SOLIDCURSOR);
+    textcolor(RED);
+    textbackground(WHITE);
     if(mouse_available() == 0) {
 	printf("No disponible");
     } else {
-	mouse_show();
-	while(!kbhit()) {
-	    mouse_data(&x, &y, &b);
-	    gotoxy(1,1);
-	    printf("X: %5i, Y: %5i, B: %5i", x, y, b);
+	//mouse_show();
+
+	while(c!=27) {
+	    //mouse_data(&x, &y, &b);
+	    gotoxy(x,y);
+	    putc(' ', stdout);
+	    if(kbhit) {
+		c = getch();
+		if(c==0) {
+		    c = getch();
+		    if(c == RIGHT) x++;
+		    if(c == LEFT) x--;
+		    if(c == DOWN) y++;
+		    if(c == UP) y--;
+		    clrscr();
+		    gotoxy(x,y);
+		    putc(' ', stdout);
+		    //printf("%i", c);
+		}
+
+	    }
+	    //printf("X: %5i, Y: %5i, B: %5i", x, y, b);
 	}
     }
     return 0;
