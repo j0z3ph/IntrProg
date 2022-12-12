@@ -1,15 +1,20 @@
 /**
  * @file main.c
  * @author Jose Luis Cruz (j0z3ph@gmail.com)
- * @brief Simple SDL sample. 
+ * @brief Simple SDL sample.
  * 1. Render texture and
- * 2. Handle keyboard and mouse events and 
+ * 2. Handle keyboard and mouse events and
  * 3. Perform basic texture motion.
+ * Controls:
+ * LEFT ARROW. Moves mushroom to the left
+ * RIGHT ARROW. Moves mushroom to the right
+ * SPACEBAR. Makes mushroom to jump
+ * CLICK. Moves mushroom to the cursor location
  * @version 0.1
  * @date 2022-12-12
- * 
+ *
  * @copyright MIT
- * 
+ *
  */
 
 #include "SDL2/SDL.h"
@@ -17,20 +22,27 @@
 
 #define SCREEN_HEIGHT 600
 #define SCREEN_WIDTH 800
+#define FPS 60
+#define SPEED 600
+#define GRAVITY 60
+#define JUMP -1200
 
 #define true 1
 #define false 0
 
 int main()
 {
-    int step = 10; // Pixels that an image moves
+    int step = 10;            // Pixels that an image moves
     SDL_Init(SDL_INIT_VIDEO); // Initialize SDL
-    IMG_Init(IMG_INIT_PNG); // Initialize IMG
-    SDL_Rect r, rMouse; // Mushroom and Shoot positions
-    SDL_Event event; // For handling events
-    int running = true; // Flag for main loop
-    
-    
+    IMG_Init(IMG_INIT_PNG);   // Initialize IMG
+    SDL_Rect r, rMouse;       // Mushroom and Shoot positions
+    SDL_Event event;          // For handling events
+    int running = true;       // Flag for main loop
+    float x_vel = 0, y_vel = 0; // X and Y velocity
+    int jump_pressed = false; // Flag that indicates spacebar was/wasn't pressed
+    int left_pressed = false; // Flag that indicates left arrow was/wasn't pressed
+    int right_pressed = false; // Flag that indicates right arrow was/wasn't pressed
+
     // Creates new SDL window
     SDL_Window *gWindow = SDL_CreateWindow("Hello SDL", 0, 0,
                                            SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -38,22 +50,22 @@ int main()
     SDL_Renderer *gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF); // Sets white background color
 
-    SDL_Texture *gTexture = NULL; // Mushroom texture
+    SDL_Texture *gTexture = NULL;      // Mushroom texture
     SDL_Texture *gTextureShoot = NULL; // Shoot texture
 
     SDL_Surface *img = IMG_Load("Hongo.png"); // Loads PNG file
 
     gTexture = SDL_CreateTextureFromSurface(gRenderer, img); // Creates mushroom texture from file
-    SDL_FreeSurface(img); // Release surface
+    SDL_FreeSurface(img);                                    // Release surface
 
-    img = IMG_Load("shoot.png"); // Loads PNG file
+    img = IMG_Load("shoot.png");                                  // Loads PNG file
     gTextureShoot = SDL_CreateTextureFromSurface(gRenderer, img); // Creates shoot texture from file
-    SDL_FreeSurface(img); // Release surface
-    
+    SDL_FreeSurface(img);                                         // Release surface
+
     // Sets mushroom texture initial position
     // and dimensions
     r.x = 0;
-    r.y = 0;
+    r.y = SCREEN_HEIGHT - 100;
     r.h = 100;
     r.w = 100;
 
@@ -67,6 +79,12 @@ int main()
     // Main loop
     while (running)
     {
+        y_vel += GRAVITY; // Applies gravity to the mushroom
+        x_vel = (right_pressed - left_pressed) * SPEED; // Applies speed to the mushroom
+        // If right arrow was pressed, applies positive speed
+        // If left arrow was pressed, applies negative speed
+        // If neither left or right arrows were pressed, applies 0 speed
+
         // If an event occurs
         while (SDL_PollEvent(&event))
         {
@@ -76,22 +94,32 @@ int main()
                 running = false;
             }
             // If a key was pressed
-            if (event.type == SDL_KEYDOWN /*&& event.key.repeat == 0*/)
+            if (event.type == SDL_KEYDOWN)
             {
-                // Adjust the mushroom's location
+                // Adjust the flags
                 switch (event.key.keysym.sym)
                 {
-                case SDLK_UP:
-                    r.y -= step; // UP
-                    break;
-                case SDLK_DOWN: // DOWN
-                    r.y += step;
+                case SDLK_SPACE: // Spacebar
+                    y_vel = JUMP; // Sets min value to Y coordinate
                     break;
                 case SDLK_LEFT: // LEFT
-                    r.x -= step;
+                    left_pressed = true;
                     break;
                 case SDLK_RIGHT: // RIGHT
-                    r.x += step;
+                    right_pressed = true;
+                    break;
+                }
+            }
+            if (event.type == SDL_KEYUP)
+            {
+                // Adjust the flags
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_LEFT: // LEFT
+                    left_pressed = false;
+                    break;
+                case SDLK_RIGHT: // RIGHT
+                    right_pressed = false;
                     break;
                 }
             }
@@ -114,25 +142,31 @@ int main()
                     SDL_GetMouseState(&r.x, &r.y);
                     r.x = r.x - (r.w / 2);
                     r.y = r.y - (r.h / 2);
+                    y_vel = JUMP / 2; // Sets half of jump
                     break;
                 case SDL_MOUSEBUTTONUP:
                     break;
                 }
             }
-
-            // If the mushroom went too far to the left
-            if (r.x < 0) r.x += step;
-            
-            // If the mushroom went too far to the right
-            if ((r.x + r.w) > SCREEN_WIDTH) r.x -= step;
-            
-            // If the mushroom went too far up
-            if (r.y < 0) r.y += step;
-            
-            // If the mushroom went too far down
-            if ((r.y + r.h) > SCREEN_HEIGHT) r.y -= step;
-            
         }
+        r.x += x_vel / 60; // Computes new X coordinate
+        r.y += y_vel / 60; // Computes new Y coordinate
+
+        // If the mushroom went too far to the left
+        if (r.x < 0)
+            r.x = 0;
+
+        // If the mushroom went too far to the right
+        if ((r.x + r.w) > SCREEN_WIDTH)
+            r.x = SCREEN_WIDTH - r.w;
+
+        // If the mushroom went too far up
+        if (r.y < 0)
+            r.y = 0;
+
+        // If the mushroom went too far down
+        if ((r.y + r.h) > SCREEN_HEIGHT)
+            r.y = SCREEN_HEIGHT - r.h;
 
         // Clear screen
         SDL_RenderClear(gRenderer);
@@ -143,7 +177,8 @@ int main()
         // Update screen
         SDL_RenderPresent(gRenderer);
 
-        // SDL_Delay(32);
+        // Waits for next fps
+        SDL_Delay(1000 / FPS);
     }
 
     // Destroy textures
@@ -151,7 +186,6 @@ int main()
     gTexture = NULL;
     SDL_DestroyTexture(gTextureShoot);
     gTexture = NULL;
-
 
     // Destroy render and window
     SDL_DestroyRenderer(gRenderer);
