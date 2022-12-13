@@ -23,16 +23,15 @@
 #define SCREEN_HEIGHT 600
 #define SCREEN_WIDTH 800
 #define FPS 60
-#define SPEED 600
-#define GRAVITY 60
-#define JUMP -1200
+#define SPEED 10
+#define GRAVITY 1
+#define JUMP -20
 
 #define true 1
 #define false 0
 
 int main(int argc, char *argv[])
 {
-    int step = 10;            // Pixels that an image moves
     SDL_Init(SDL_INIT_VIDEO); // Initialize SDL
     IMG_Init(IMG_INIT_PNG);   // Initialize IMG
     SDL_Rect r, rMouse;       // Mushroom and Shoot positions
@@ -149,8 +148,8 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        r.x += x_vel / 60; // Computes new X coordinate
-        r.y += y_vel / 60; // Computes new Y coordinate
+        r.x += x_vel; // Computes new X coordinate
+        r.y += y_vel; // Computes new Y coordinate
 
         // If the mushroom went too far to the left
         if (r.x < 0)
