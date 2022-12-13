@@ -17,8 +17,8 @@
  *
  */
 
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #define SCREEN_HEIGHT 600
 #define SCREEN_WIDTH 800
@@ -30,7 +30,7 @@
 #define true 1
 #define false 0
 
-int main()
+int main(int argc, char *argv[])
 {
     int step = 10;            // Pixels that an image moves
     SDL_Init(SDL_INIT_VIDEO); // Initialize SDL
@@ -44,7 +44,7 @@ int main()
     int right_pressed = false; // Flag that indicates right arrow was/wasn't pressed
 
     // Creates new SDL window
-    SDL_Window *gWindow = SDL_CreateWindow("Hello SDL", 0, 0,
+    SDL_Window *gWindow = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                            SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     // Creates the render context of the window
     SDL_Renderer *gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
