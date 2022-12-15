@@ -11,9 +11,9 @@
 #define BARSPACE 32
 
 #define FPS 60
-#define GRAVITY 5
+#define GRAVITY 1
 #define VELOCITY 10
-#define JUMP -200
+#define JUMP -20
 
 #define true 1
 #define false 0
@@ -28,6 +28,7 @@ int main() {
     int maxx, maxy;
     int right = false;
     int left = false;
+    int vel = 0;
     initgraph(&gd, &gm, "C:\\TURBOC3\\BGI");
 
     maxx = getmaxx();
@@ -46,8 +47,9 @@ int main() {
     bar(x1,y1,x2,y2);
     //outtextxy(100,100,"HOLA");
     while(c!=27) {
-	y1 += GRAVITY;
-	y2 += GRAVITY;
+	vel += GRAVITY;
+	y1 += vel;
+	y2 += vel;
 	x1 += (right - left) * VELOCITY;
 	x2 += (right - left) * VELOCITY;
 
@@ -80,8 +82,8 @@ int main() {
 		} */
 
 	    } else if(c == BARSPACE) {
-		y1 += JUMP;
-		y2 += JUMP;
+		vel = JUMP;
+		y2 -= 1;
 	    }
 	} else {
 	    left = false;
@@ -99,6 +101,7 @@ int main() {
 	if(y2 > maxy) {
 	    y2 = maxy;
 	    y1 = maxy-50;
+	    vel = 0;
 	}
 	if(y1 < 0) {
 	    y1 = 0;
