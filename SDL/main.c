@@ -107,6 +107,9 @@ int main(int argc, char *argv[])
                 case SDLK_RIGHT: // RIGHT
                     right_pressed = true;
                     break;
+                case SDLK_ESCAPE:
+                    running = false;
+                    break;
                 }
             }
             if (event.type == SDL_KEYUP)
